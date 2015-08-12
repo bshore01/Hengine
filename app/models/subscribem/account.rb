@@ -1,5 +1,8 @@
 module Subscribem
   class Account < ActiveRecord::Base
+  	has_many :members, :class_name => "Subscribem::Member"
+	has_many :users, :through => :members
+
   	validates :subdomain, :presence => true, :uniqueness => true
 
   	EXCLUDED_SUBDOMAINS = %w(admin)
@@ -15,5 +18,14 @@ module Subscribem
 
   	belongs_to :owner, :class_name => "Subscribem::User"
   	accepts_nested_attributes_for :owner
+
+  	def self.create_with_owner(params={})
+		account = new(params)
+		if account.save
+			account.users << account.owner
+		end
+			account
+	end
+
   end
 end
